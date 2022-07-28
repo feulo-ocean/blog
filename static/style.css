@@ -30,3 +30,7 @@ hr{
 .post .body{
     white-space: pre-line;
 }
+.no-posts{
+    font-style: italic;
+    color: gray;
+}
