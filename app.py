@@ -1,8 +1,9 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, request, flash
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin
+from flask_login import LoginManager, UserMixin, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
+from sqlalchemy.exc import IntegrityError
 
 app = Flask("hello")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
@@ -46,6 +47,25 @@ def index():
     posts = Post.query.all()
     return render_template("index.html", posts=posts)
 
-@app.route('/register')
+@app.route('/register', methods=["GET","POST"])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    if request.method == "POST":
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        try:
+            new_user = User(username=username, email=email)
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.commit()
+        except IntegrityError:
+            flash("Username or E-mail already exists!")
+        else:
+            return redirect(url_for('login'))
     return render_template('register.html')
+
+@app.route('/login')
+def login():
+    return render_template("login.html")
