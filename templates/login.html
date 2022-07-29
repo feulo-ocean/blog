@@ -3,5 +3,11 @@
 {% block title %} Login {% endblock %}
 
 {% block content %}
-
+<form method="POST">
+    <label for="username">Username: </label>
+    <input id="username" name="username" required>
+    <label for="password">Password: </label>
+    <input id="password" name="password" required type="password">
+    <input type="submit" value="Login">
+</form>
 {% endblock %}

@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request, flash
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, current_user, logout_user, login_user
+from flask_login import LoginManager, UserMixin, current_user, logout_user, login_user, login_required
 from werkzeug.security import check_password_hash, generate_password_hash
 from sqlalchemy.exc import IntegrityError
 
@@ -79,10 +79,24 @@ def login():
             return redirect(url_for('login'))
         login_user(user)
         return redirect(url_for('index'))
-
     return render_template("login.html")
 
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+@app.route('/create', methods=["GET", "POST"])
+@login_required
+def create():
+    if request.method == "POST":
+        title = request.form['title']
+        body = request.form['body']
+        try:
+            post = Post(title=title, body=body, author=current_user)
+            db.session.add(post)
+            db.session.commit()
+            return redirect(url_for('index'))
+        except IntegrityError:
+            flash("Error on create Post, try again later")
+    return render_template('create.html')
